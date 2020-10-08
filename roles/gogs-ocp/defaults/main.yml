@@ -1,0 +1,25 @@
+---
+# defaults file for gogs-ocp
+_gogs_state: present
+_gogs_namespace: gogs
+_gogs_name: gogs
+
+_gogs_ssl: False
+_gogs_postgresql_database_name: postgresql
+_gogs_postgresql_service_name: postgresql
+_gogs_postgresql_user: postgresql
+_gogs_postgresql_password: postgresql
+_gogs_volume_size: 1Gi
+_gogs_memory_request: 512Mi
+_gogs_memory_limit: 512Mi
+_gogs_cpu_request: 200m
+_gogs_cpu_limit: 500m
+_gogs_wait_for_init: true
+_gogs_image: quay.io/gpte-devops-automation/gogs
+_gogs_image_tag: latest
+
+# Set to a valid route for the cluster to make a nicer route than svc-project.apps. Leave empty for default route
+_gogs_route: ""
+
+# Internal variable. Do not change
+_gogs_actual_route: ""
