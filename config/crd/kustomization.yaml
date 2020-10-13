@@ -4,4 +4,5 @@
 resources:
 - bases/cache.example.com_memcacheds.yaml
 - bases/cache.example.com_mydeployments.yaml
+- bases/cache.example.com_myexternaldeployments.yaml
 # +kubebuilder:scaffold:crdkustomizeresource

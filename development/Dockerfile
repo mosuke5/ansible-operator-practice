@@ -19,6 +19,8 @@ RUN curl -L ${DOWNLOAD_URL}/operator-sdk-${RELEASE_VERSION}-x86_64-linux-gnu -o 
 RUN curl -L ${DOWNLOAD_URL}/ansible-operator-${RELEASE_VERSION}-x86_64-linux-gnu -o /usr/local/bin/ansible-operator \
   && chmod +x /usr/local/bin/ansible-operator
 
-RUN dnf install -y make ansible git vim python-ansible-runner
+RUN dnf install -y make ansible git vim python-ansible-runner python
+
+RUN pip install openshift ansible-runner-http
 
 USER 1001

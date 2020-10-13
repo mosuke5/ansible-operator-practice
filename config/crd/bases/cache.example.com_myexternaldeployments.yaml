@@ -2,20 +2,20 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: memcacheds.cache.example.com
+  name: myexternaldeployments.cache.example.com
 spec:
   group: cache.example.com
   names:
-    kind: Memcached
-    listKind: MemcachedList
-    plural: memcacheds
-    singular: memcached
+    kind: MyExternalDeployment
+    listKind: MyExternalDeploymentList
+    plural: myexternaldeployments
+    singular: myexternaldeployment
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - name: v1
     schema:
       openAPIV3Schema:
-        description: Memcached is the Schema for the memcacheds API
+        description: MyExternalDeployment is the Schema for the myexternaldeployments API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -32,19 +32,19 @@ spec:
           spec:
             description: MemcachedSpec defines the desired state of Memcached
             properties:
-              size:
-                description: Size is the size of the memcached deployment
-                format: int32
-                type: integer
+              monitoringUrl:
+                description: Monitor http response and adjust deployment replicas
+                type: string
+                default: "http://blog.mosuke.tech/"
               imagetag:
                 description: Image Tag is the name of image tag 
                 type: string
                 default: "latest"
             required:
-              - size
+              - monitoringUrl
             type: object
           status:
-            description: Status defines the observed state of Memcached
+            description: Status defines the observed state of MyExternalDeployment
             type: object
             x-kubernetes-preserve-unknown-fields: true
         type: object

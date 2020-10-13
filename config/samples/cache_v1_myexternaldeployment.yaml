@@ -1,0 +1,7 @@
+apiVersion: cache.example.com/v1
+kind: MyExternalDeployment
+metadata:
+  name: myexternaldeployment-sample
+spec:
+  monitoringUrl: http://xxxx
+  imagetag: latest

@@ -1,0 +1,45 @@
+---
+- hosts: localhost
+  gather_facts: no
+  collections:
+    - community.kubernetes
+    - operator_sdk.util
+  tasks:
+    - name: Fetch external status
+      uri:
+        url: "{{ monitoringUrl }}"
+        method: GET
+      register: external-row-status
+
+    - set_fact:
+        external-status: "{{ external-row-status.stdout | from_json }}"
+
+    - name: update deployment
+      community.kubernetes.k8s:
+        definition:
+          kind: Deployment
+          apiVersion: apps/v1
+          metadata:
+            name: '{{ ansible_operator_meta.name }}-memcached'
+            namespace: '{{ ansible_operator_meta.namespace }}'
+          spec:
+            replicas: "{{ external-status['replicas'] }}"
+            selector:
+              matchLabels:
+                app: memcached
+            template:
+              metadata:
+                labels:
+                  app: memcached
+              spec:
+                containers:
+                - name: memcached
+                  command:
+                  - memcached
+                  - -m=64
+                  - -o
+                  - modern
+                  - -v
+                  image: "docker.io/memcached:{{ imagetag }}"
+                  ports:
+                    - containerPort: 11211

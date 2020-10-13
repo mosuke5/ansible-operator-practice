@@ -8,4 +8,7 @@ resources:
 - group: cache
   kind: MyDeployment
   version: v1alpha1
+- group: cache
+  kind: MyExternalDeployment
+  version: v1
 version: 3-alpha
