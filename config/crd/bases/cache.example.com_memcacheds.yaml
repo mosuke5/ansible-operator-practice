@@ -37,11 +37,11 @@ spec:
                 format: int32
                 type: integer
               imagetag:
-                description: Image Tag is the name of image tag 
+                description: Image Tag is the name of image tag
                 type: string
                 default: "latest"
             required:
-              - size
+            - size
             type: object
           status:
             description: Status defines the observed state of Memcached

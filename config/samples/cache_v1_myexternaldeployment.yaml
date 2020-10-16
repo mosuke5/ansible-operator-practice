@@ -1,7 +1,9 @@
 apiVersion: cache.example.com/v1
 kind: MyExternalDeployment
 metadata:
+  annotations:
+    ansible.sdk.operatorframework.io/verbosity: "5"
   name: myexternaldeployment-sample
 spec:
-  monitoringUrl: http://xxxx
+  monitoringUrl: https://raw.githubusercontent.com/mosuke5/ansible-operator-practice/master/config/testdata/sample.json
   imagetag: latest

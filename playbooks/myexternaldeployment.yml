@@ -4,42 +4,67 @@
   collections:
     - community.kubernetes
     - operator_sdk.util
+  vars:
+    testvar: {
+      "hoge": "fuga",
+      "foo": 3
+    }
+    testintvar: 4
   tasks:
-    - name: Fetch external status
-      uri:
-        url: "{{ monitoringUrl }}"
-        method: GET
-      register: external-row-status
+    - debug:
+        msg: "{{ testvar }}"
 
-    - set_fact:
-        external-status: "{{ external-row-status.stdout | from_json }}"
+    - debug:
+        msg: "{{ testvar.foo }}"
 
-    - name: update deployment
-      community.kubernetes.k8s:
-        definition:
-          kind: Deployment
-          apiVersion: apps/v1
-          metadata:
-            name: '{{ ansible_operator_meta.name }}-memcached'
-            namespace: '{{ ansible_operator_meta.namespace }}'
-          spec:
-            replicas: "{{ external-status['replicas'] }}"
-            selector:
-              matchLabels:
-                app: memcached
-            template:
-              metadata:
-                labels:
-                  app: memcached
-              spec:
-                containers:
-                - name: memcached
-                  command:
-                  - memcached
-                  - -m=64
-                  - -o
-                  - modern
-                  - -v
-                  image: "docker.io/memcached:{{ imagetag }}"
-                  ports:
-                    - containerPort: 11211
+    - debug:
+        msg: "{{ testintvar }}"
+
+#    - name: Fetch external status
+#      uri:
+#        url: "{{ _cache_example_com_myexternaldeployment.spec.monitoringUrl }}"
+#        method: GET
+#        return_content: yes
+#      register: result
+#
+#    - set_fact:
+#        external_status: "{{ result.content | from_json }}"
+#
+#    - debug:
+#        msg: "external_status is {{ external_status | type_debug }}"
+#
+    #- debug:
+    #    msg: "external_status.replicas is {{ external_status.replicas | type_debug }}"
+
+    #- debug:
+    #    msg: "replicas is {{ replicas | type_debug }}"
+
+    #- name: update deployment
+    #  community.kubernetes.k8s:
+    #    definition:
+    #      kind: Deployment
+    #      apiVersion: apps/v1
+    #      metadata:
+    #        name: '{{ ansible_operator_meta.name }}-memcached'
+    #        namespace: '{{ ansible_operator_meta.namespace }}'
+    #      spec:
+    #        replicas: '{{ replicas }}'
+    #        selector:
+    #          matchLabels:
+    #            app: memcached
+    #        template:
+    #          metadata:
+    #            labels:
+    #              app: memcached
+    #          spec:
+    #            containers:
+    #            - name: memcached
+    #              command:
+    #              - memcached
+    #              - -m=64
+    #              - -o
+    #              - modern
+    #              - -v
+    #              image: "docker.io/memcached:{{ imagetag }}"
+    #              ports:
+    #                - containerPort: 11211

@@ -4,7 +4,7 @@ projectName: memcache-operator
 resources:
 - group: cache
   kind: Memcached
-  version: v1
+  version: v1alpha1
 - group: cache
   kind: MyDeployment
   version: v1alpha1

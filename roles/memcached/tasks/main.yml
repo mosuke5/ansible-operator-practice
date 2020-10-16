@@ -28,7 +28,7 @@
               image: "docker.io/memcached:{{ imagetag }}"
               #image: "docker.io/memcached:1.4.36-alpine"
               ports:
-                - containerPort: 11211
+              - containerPort: 11211
 
 - name: create memcached service
   community.kubernetes.k8s:
