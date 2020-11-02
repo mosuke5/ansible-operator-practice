@@ -35,6 +35,7 @@
           - ansible
           - ansible-runner
           - ansible-runner-http
+          - molecule
 
     - name: Download openshift-client
       get_url:
