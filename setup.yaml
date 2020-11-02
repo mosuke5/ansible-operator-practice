@@ -1,0 +1,54 @@
+---
+- hosts: localhost
+  vars:
+    release_version: v0.19.4
+    ocp_version: 4.4.29
+  become: yes
+  tasks:
+    - name: Install utility packages
+      dnf:
+        name:
+          - git
+          - vim
+          - make
+          - podman-docker
+          - python3-pip
+          - python3-devel
+          - gcc
+        state: latest
+
+    - name: Install OperatorSDK
+      get_url:
+        url: "https://github.com/operator-framework/operator-sdk/releases/download/{{ release_version }}/operator-sdk-{{ release_version }}-x86_64-linux-gnu"
+        dest: /usr/local/bin/operator-sdk
+        mode: '0755'
+
+    - name: Install AnsibleOperator
+      get_url:
+        url: "https://github.com/operator-framework/operator-sdk/releases/download/{{ release_version }}/ansible-operator-{{ release_version }}-x86_64-linux-gnu"
+        dest: /usr/local/bin/ansible-operator
+        mode: '0755'
+
+    - name: Install ansible and ansible-runner
+      pip:
+        name:
+          - ansible
+          - ansible-runner
+          - ansible-runner-http
+
+    - name: Download openshift-client
+      get_url:
+        url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ ocp_version }}/openshift-client-linux.tar.gz"
+        dest: /tmp/
+
+    - name: Unarchive openshift-client
+      unarchive:
+        src: /tmp/openshift-client-linux.tar.gz
+        dest: /tmp
+        remote_src: yes
+
+    - name: Copy oc client to executable path
+      copy:
+        src: /tmp/oc
+        dest: /usr/local/bin/oc
+        mode: '0755'
