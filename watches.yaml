@@ -1,17 +1,5 @@
 ---
-# Use the 'create api' subcommand to add watches to this file.
 - version: v1alpha1
-  group: cache.example.com
+  group: user10.example.com
   kind: Memcached
   role: memcached
-- version: v1alpha1
-  group: cache.example.com
-  kind: MyDeployment
-  playbook: playbooks/mydeployment.yaml
-- version: v1
-  group: cache.example.com
-  kind: MyExternalDeployment
-  playbook: playbooks/myexternaldeployment.yml
-  reconcilePeriod: 10s
-  watchDependentResources: False
-# +kubebuilder:scaffold:watch

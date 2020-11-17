@@ -1,6 +1,0 @@
-apiVersion: cache.example.com/v1alpha1
-kind: MyDeployment
-metadata:
-  name: mydeployment-sample
-spec:
-  foo: bar
