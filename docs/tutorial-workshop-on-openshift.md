@@ -462,6 +462,95 @@ NAME                                     TYPE        CLUSTER-IP       EXTERNAL-I
 service/example-mydeployment-memcached   ClusterIP   172.30.189.198   <none>        11211/TCP   2m39s
 ```
 
+### テストの実行
+moleculeを用いたOperatorの自動テストについて解説します。  
+Operator SDKでは、moleculeを用いた自動テストができますが、実行方法がいくつかあります。ひとつは、kindを用いたローカルでのテストと、クラスタを用いたテストです。
+今回は、上の手順で利用していたクラスタを使ってテストを行います。
+
+そのまえにせっかくなので、上で作ったOperatorを新しいバージョンでビルドします。
+
+```
+$ operator-sdk build $REGISTRY_URL/user10-operator/memcached-operator-tutorial:v0.0.2
+Successfully built 5b7776295d73
+Successfully tagged default-route-openshift-image-registry.apps.cluster-4fd5.4fd5.sandbox1350.opentlc.com/user10-operator/memcached-operator-tutorial:v0.0.2
+INFO[0001] Operator build complete.
+
+$ docker push $REGISTRY_URL/user10-operator/memcached-operator-tutorial:v0.0.2
+v0.0.2: digest: sha256:3b25b899c73072a80b63691ed68933728711ac52ddc6afdec6d47f51fde20486 size: 3028
+
+$ oc get imagetag
+NAME                                 SPEC   STATUS                                                                          HISTORY   UPDATED
+memcached-operator-tutorial:v0.0.1   Push   image/sha256:738b4c9884ea7c7c79c4d23881e6e16aacd8b61a42b7bbf3542cd39864068d1e   1         3 hours ago
+memcached-operator-tutorial:v0.0.2   Push   image/sha256:3b25b899c73072a80b63691ed68933728711ac52ddc6afdec6d47f51fde20486   1         23 seconds ago
+```
+
+テストコードを記述します。  
+テストコードは、`/molecule`のディレクトリ配下に記述します。
+多くはoperator-sdkによって自動生成されているファイルですが、`molecule/cluster/verify.yml`に任意のテストコードを追加できます。
+
+ここではシンプルなテストですが、`community.kubernetes.k8s_info`モジュールを用いて、期待するDeploymentと期待する数MemcachedのPodが立ち上がっていることを確認してみます。
+
+```
+$ vim molecule/cluster/verify.yml
+...
+    # 期待するdeploymentができていること
+    - name: Get an existing Service object
+      community.kubernetes.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        name: example-memcached-memcached
+        namespace: "{{ namespace }}"
+      register: memcached_deployment
+
+    - name: Test if existing the deployment
+      assert:
+        that:
+        - memcached_deployment.resources[0].metadata.name == "example-memcached-memcached"
+
+    ## 期待する数のPodができていること
+    - name: Get an existing Service object
+      community.kubernetes.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: "{{ namespace }}"
+        label_selectors:
+        - app = memcached
+      register: memcached_pods
+
+    - name: Test if existing pods
+      assert:
+        that:
+        - "{{ memcached_pods.resources | length }} == 3"
+```
+
+さてテストが書けたので実行します。  
+テストの実行に際していくつか注意点があるので解説しながらすすめます。
+
+まずひとつは、権限です。  
+デフォルトではmoleculeを使ったテストは`osdk-test`というnamespace内にリソースを作成してテストを行います。今までのプロセスで、Operatorのイメージは`userXX-operator`に格納していました。そのため、namespaceをまたいでイメージを参照ができずエラーになります。あらかめ`osdk-test`のServiceAccountの`memcached-operator`に参照権限を与えておきます。
+
+```
+$ oc adm policy add-role-to-user view system:serviceaccount:osdk-test:memcached-operator -n user10-operator
+Warning: ServiceAccount 'memcached-operator' not found
+```
+
+次に、Operatorが利用するイメージを指定する必要があります。環境変数で、`OPERATOR_IMAGE`で指定可能です。
+公式ドキュメントでは[こちらを](https://v0-19-x.sdk.operatorframework.io/docs/ansible/testing-guide/#configuration-1)ご確認ください。
+
+```
+$ export OPERATOR_IMAGE=image-registry.openshift-image-registry.svc:5000/user10-operator/memcached-operator-tutorial:v0.0.2
+```
+
+そしていよいよテストの実行です。  
+テストの最初のフェーズでyamllintによる、静的解析が走ります。
+テストが落ちてしまった場合は、エラーメッセージをよくみて対応してみましょう。
+テスト実行中は、別のターミナルで`watch oc get pod -n osdk-test`などと状態をみておくと理解が深まります。
+
+```
+$ molecule test -s cluster
+テストがパスするのを見守ってください。
+```
+
 ## 外部システムのステートを利用する
 Kubernetes内部ではなく、外部システムのステートを用いて処理する場合、`watches.yaml`の`reconcilePeriod`のオプションを利用します。
 定期的にansible playbookを実行することができるようになります。

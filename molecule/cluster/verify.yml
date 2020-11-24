@@ -8,14 +8,15 @@
     - community.kubernetes
 
   vars:
-    custom_resource: "{{ lookup('template', '/'.join([deploy_dir, 'crds/user10.example.com_v1alpha1_memcached_cr.yaml'])) | from_yaml }}"
+    memcached_custom_resource: "{{ lookup('template', '/'.join([deploy_dir, 'crds/user10.example.com_v1alpha1_memcached_cr.yaml'])) | from_yaml }}"
+    mydeployments_custom_resource: "{{ lookup('template', '/'.join([deploy_dir, 'crds/user10.example.com_v1alpha1_mydeployments_cr.yaml'])) | from_yaml }}"
 
   tasks:
     - name: Create the user10.example.com/v1alpha1.Memcached and wait for reconciliation to complete
       k8s:
         state: present
         namespace: '{{ namespace }}'
-        definition: '{{ custom_resource }}'
+        definition: '{{ memcached_custom_resource }}'
         wait: yes
         wait_timeout: 300
         wait_condition:
@@ -33,3 +34,32 @@
     - name: Example assertion
       assert:
         that: (pods | length) > 0
+
+    # 期待するdeploymentができていること
+    - name: Get an existing Service object
+      community.kubernetes.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        name: example-memcached-memcached
+        namespace: "{{ namespace }}"
+      register: memcached_deployment
+
+    - name: Test if existing the deployment
+      assert:
+        that:
+        - memcached_deployment.resources[0].metadata.name == "example-memcached-memcached"
+
+    ## 期待する数のPodができていること
+    - name: Get an existing Service object
+      community.kubernetes.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: "{{ namespace }}"
+        label_selectors:
+        - app = memcached
+      register: memcached_pods
+
+    - name: Test if existing pods
+      assert:
+        that:
+        - "{{ memcached_pods.resources | length }} == 3"
