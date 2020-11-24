@@ -8,7 +8,7 @@
         name: '{{ meta.name }}-memcached'
         namespace: '{{ meta.namespace }}'
       spec:
-        replicas: "{{size}}"
+        replicas: "{{ size }}"
         selector:
           matchLabels:
             app: memcached
@@ -25,6 +25,22 @@
               - -o
               - modern
               - -v
-              image: "docker.io/memcached:1.4.36-alpine"
+              image: "{{ image }}:{{ imagetag }}"
               ports:
-                - containerPort: 11211
+              - containerPort: 11211
+
+- name: create memcached service
+  community.kubernetes.k8s:
+    definition:
+      kind: Service
+      apiVersion: v1
+      metadata:
+        name: '{{ meta.name }}-memcached'
+        namespace: '{{ meta.namespace }}'
+      spec:
+        ports:
+        - name: memcached
+          port: 11211
+          targetPort: 11211
+        selector:
+          app: memcached

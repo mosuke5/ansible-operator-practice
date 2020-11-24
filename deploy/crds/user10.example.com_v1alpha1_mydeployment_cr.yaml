@@ -1,0 +1,8 @@
+apiVersion: user10.example.com/v1alpha1
+kind: MyDeployment
+metadata:
+  name: example-mydeployment
+spec:
+  size: 3
+  image: memcached
+  imagetag: 1.4.36-alpine

@@ -3,3 +3,8 @@
   group: user10.example.com
   kind: Memcached
   role: memcached
+
+- version: v1alpha1
+  group: user10.example.com
+  kind: MyDeployment
+  role: mydeployment

@@ -70,6 +70,7 @@ rules:
   - user10.example.com
   resources:
   - '*'
+  - mydeployments
   verbs:
   - create
   - delete

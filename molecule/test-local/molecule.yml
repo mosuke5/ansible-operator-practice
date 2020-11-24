@@ -2,7 +2,8 @@
 dependency:
   name: galaxy
 driver:
-  name: docker
+  name: delegated
+  #name: docker
 lint: |
   set -e
   yamllint -d "{extends: relaxed, rules: {line-length: {max: 120}}}" .
